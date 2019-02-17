@@ -5,8 +5,8 @@ The project consists of three parts.
 
 The input GUI allows the user to create a city from nodes and edges. Each edge is directed and has a time taken to shovel and priority. The input GUI will produce a txt that describes the city in the form of shown below
 
-Plows Nodes Edges
-NodeID NodeX NodeY
+Plows Nodes Edges\n
+NodeID NodeX NodeY\n
 ...
 EdgeSrc	Dest Time Priority
 ...

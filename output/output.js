@@ -5,6 +5,7 @@ var pos = 0;
 var id;
 var initialized = false;
 var nodeDiameter = 15;
+var plowDiameter = 20;
 
 var backgroundColor = "black";
 var nodeColor = "white";
@@ -26,13 +27,19 @@ var offset;
 
 var nodes = [];
 var roads = [];
+var plows = [];
 
-var img;
+var haveChoices = false;
+var haveMap = false;
+
+var speedFactor = 1; //This is how much we will speed up the animation by 
 
 function setup(){
 
-    //Reading in the files 
+    //Reading in the map
     document.getElementById('file').onchange = function(){
+
+        haveMap = true;
 
         nodes = [];
         var file = this.files[0];
@@ -68,7 +75,7 @@ function setup(){
             if(y > maxy) maxy = y;
           }
 
-          //crate their images
+          //create their images
           nodes.forEach(function(node){node.updateImg()});
           
           //This creates all of the roads
@@ -94,6 +101,26 @@ function setup(){
         reader.readAsText(file);
       };
 
+    //Read in plow movements
+    document.getElementById('choices').onchange = function(){
+        haveChoices = true;
+
+        var file = this.files[0];
+        
+        var reader = new FileReader();
+        reader.onload = function(progressEvent){
+            var lines = this.result.split('\n');
+            for(var line = 0; line < lines.length; line++){
+                plows.push(new Plow());
+                plows[line].nodes = lines[line].split(separator);
+                plows[line].numberNodes = plows[line].nodes.length;
+            }
+            alert("File load successful");
+        };
+        reader.readAsText(file);
+    };
+
+
     //Create the background element
 
     background = document.createElement("div");
@@ -116,11 +143,19 @@ function setup(){
 }
 
 function loop(){
-    
+    plows.forEach(function(plow){plow.update()});
 }
 
 function play(){
-    id = setInterval(loop, 5);
+    if(!haveChoices){
+        alert("Need choices!");
+    }
+    if(!haveMap){
+        alert("Need map!");
+    }
+    if(haveChoices && haveMap){
+        id = setInterval(loop, 5);
+    }
 }
 
 function pause(){
@@ -154,12 +189,13 @@ function Node(id,x,y){
 function Road(source, dest, time, priority){
     this.source = source;
     this.dest = dest;
-    this.time = time;
-    this.priority = priority;
+    this.time = parseInt(time);
+    this.priority = parseInt(priority);
     this.shovelled = false;
     
     this.img = document.createElement("IMG");
     this.img.style.position = "absolute";
+    
     
     this.updateImg = function(){
         if(this.shovelled){
@@ -184,9 +220,107 @@ function Road(source, dest, time, priority){
        this.img.style.height = imgHeight + 'px';
 
        this.img.style.transform = "rotate("+angle*57.2957795131+"deg)";
-    //alert("dab");
-
        background.appendChild(this.img);
+    //alert("dab");
     }
 }
 
+function Plow(){
+    this.initialized = false;
+    this.nodes = [];
+    this.numberNodes = 0;
+    this.currentNodeIndex = 0;
+    this.currentEdge = null;
+    this.finishedRoute = false;
+    this.currentNode = null;
+    this.nextNode = null;
+    this.progress = 0;
+
+    this.img = document.createElement("IMG");
+    this.img.style.position = "absolute";
+    this.img.src = "plow.png";
+    this.img.style.width = plowDiameter + 'px'
+    this.img.style.height = plowDiameter + 'px';
+
+    this.findEdge = function(){
+
+        this.currentNode = this.nodes[this.currentNodeIndex];
+        this.nextNode = this.nodes[this.currentNodeIndex+1];
+
+        if(this.currentNodeIndex + 1 == this.numNodes){
+            this.currentEdge = null;
+            this.finishedRoute = true;
+            return;
+        }
+        
+
+        for(var i = 0; i < roads.length ; i++){
+
+            road = roads[i];
+            //alert(road.source.id + ' ' + this.currentNode.id + ' ' + road.dest.id + ' ' + this.nextNode.id);
+            if(road.source == this.currentNode && road.dest == this.nextNode){
+                //alert("so good");
+                this.currentEdge = roads[i];
+                //alert("found edge " + i);
+                return;
+            }
+        }
+
+        alert("Invalid instruction set. No edge from " + this.currentNode.id + " to " + this.nextNode.id);
+
+    };
+
+    this.findNextEdge = function(){
+        if(!this.finishedRoute){ 
+            this.currentNodeIndex += 1;
+            this.findEdge();
+        }
+    };
+
+    this.initialize = function(){
+        this.initialized = true;
+        for(var i = 0;  i < this.numberNodes; i++){
+            this.nodes[i] = nodes[this.nodes[i]];
+        }
+        background.appendChild(this.img);  
+        this.findEdge();
+    };
+
+    this.update = function(){
+        if(this.routeFinished) return;
+
+        if(!this.initialized){
+            this.initialize();
+            return;
+        }
+
+        if(this.progress >= 100){
+            this.progress = 0;
+            this.currentEdge.shovelled = true;
+            this.currentEdge.updateImg();
+
+            if(this.currentNodeIndex + 1 == this.numberNodes){
+                this.routeFinished = true;
+                return;
+            }
+            this.findNextEdge();
+        }
+            
+        if(this.currentEdge != null){
+            this.currentNode = this.nodes[this.currentNodeIndex];
+            this.nextNode = this.nodes[this.currentNodeIndex+1];
+
+            this.progress += 1/this.currentEdge.time;
+            //alert(this.progress + ' ' + this.currentEdge.time);
+
+            //positioning
+            var offx = -nodeDiameter/2;
+            var offy = -nodeDiameter/2;
+            var x = this.currentNode.imgx + this.progress/100*(this.nextNode.imgx - this.currentNode.imgx) + nodeDiameter/2;
+            var y = this.currentNode.imgy + this.progress/100*(this.nextNode.imgy - this.currentNode.imgy) + nodeDiameter/2;
+
+            this.img.style.top = y + offy + 'px';
+            this.img.style.left = x + offx + 'px';
+        }
+    };
+}

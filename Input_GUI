@@ -1,0 +1,336 @@
+import java.util.*;
+import static javax.swing.JOptionPane.*;
+
+PrintWriter output;
+
+Node[] nodes;
+Road[] roads;
+String input = "northwestcalg.txt";
+
+int roadd = 0;
+int m = 1;
+int numn = 0;
+int roadn = 0;
+int plow = 2;
+int xmouse, ymouse;
+int addnode = 0;
+int addroad = 0;
+int editnode = 0;
+int editroad = 0;
+int e;
+int croad;
+int cnode, cnode2;
+
+class Node{
+  int num, x, y;
+   Node (int number, int xpos, int ypos){
+     num = number;
+     x = xpos;
+     y = ypos;
+   }
+}
+
+class Road{
+  int src, dest, time, pri;
+  Road (int s, int d, int t, int p){
+    src = s;
+    dest = d;
+    time = t;
+    pri = p;
+  }
+}
+
+void setup() {
+  size(700,700);
+  output = createWriter("data.txt");
+  output.flush();
+  smooth();
+  frameRate(60);
+  nodes = new Node[100];
+  roads = new Road[100];
+}
+
+void draw() {
+  background(255);
+  fill(200,50,150);
+  rect(0,0,1.2*width/8,1.2*height/8);
+  rect(1.2*width/8,0,1.2*width/8, 1.2*height/8);
+  rect(2*1.2*width/8,0,1.2*width/8, 1.2*height/8);
+  rect(3*1.2*width/8,0,1.2*width/8, 1.2*height/8);
+  textSize(12);
+  fill(0);
+  text("New Node", 0.025*width, 0.075*height);
+  text("New Road", (1.2/8+0.025)*width, 0.075*height);
+  text("Edit Node", (2.4/8+0.025)*width, 0.075*height);
+  text("Edit Road", (3*1.2/8+0.025)*width, 0.075*height);
+  for (int i = 0; i < roadn; i++){
+  if (m == 1){
+    fill(0);
+  int xm = nodes[roads[i].src].x + (nodes[roads[i].dest].x-nodes[roads[i].src].x)/2;
+  int ym = nodes[roads[i].src].y + (nodes[roads[i].dest].y-nodes[roads[i].src].y)/2;
+  textSize(9);
+  text(roads[i].time + ","+ roads[i].pri, xm, ym);
+  }
+    fill(0);
+    line(nodes[roads[i].src].x, nodes[roads[i].src].y, 
+      nodes[roads[i].dest].x, nodes[roads[i].dest].y);
+  
+  }
+  for (int i = 0; i < numn; i++){
+    fill(255);
+    ellipse(nodes[i].x, nodes[i].y, 0.02*width,0.02*height);
+    fill(0);
+    textSize(0.006*width+0.006*height);
+    if (i < 10)
+      text(i, nodes[i].x - 3, nodes[i].y + 4);
+    else 
+      text(i, nodes[i].x - 5, nodes[i].y + 4);
+  }
+  if (addnode == 1){
+    fill(255);
+    ellipse(mouseX, mouseY, 0.02*width,0.02*height);
+    fill(0);
+    if (numn+1 < 10)
+      text(numn, mouseX - 3, mouseY + 4);
+    else 
+      text(numn, mouseX - 5, mouseY + 4);
+  }
+}
+
+void new_node(){
+  if (addnode == 0){
+    addnode = 1;
+    addroad = 0;
+    showMessageDialog(null, "Please place the new node");
+  } else {
+    if (mouseY > 1.2*height/8){
+      fill(255);
+      nodes[numn] = new Node(numn, mouseX, mouseY);
+      ellipse(mouseX, mouseY, 0.005*width,0.005*height);
+      fill(0);
+      if (numn < 10)
+        text(numn, mouseX-3, mouseY+4);
+       else 
+         text(numn, mouseX-5, mouseY+4);
+      numn++;
+    } else {
+      
+    }
+  }
+}
+
+void new_road(){
+  print(roadd);
+  int s = -1, d = -1, t = -1, p = -1;
+  if (roadd == 0){
+      s = int(0);              // the idea is if a user inputs "-1" they can choose the nodes 
+      if (s == -1){            // with the mouse, however need to develop a delay to allow for mouse clicks
+        showMessageDialog(null,"Please select the source node");
+        roadd = -5;
+      }else{
+      final String d1 = showInputDialog("Please enter the destination node");
+      d = int(d1);
+      }
+  }
+  if (roadd == 1){
+    roadd = -1;
+  }
+  if (roadd == 2){
+    showMessageDialog(null, "Please select the destination node");
+      roadd = 3;
+  }
+  if (roadd == 3){
+    roadd = -2;
+  }
+  if (roadd == 4){
+    s = cnode;
+    d = cnode2;
+  }
+    final String t1 = showInputDialog("Please enter the travel time of the road");
+      t = int(t1);
+      final String p1 = showInputDialog("Please enter the priority of the road");
+      p = int(p1);
+    roads[roadn] = new Road(s, d, t, p);
+    fill(0);
+    line(nodes[roads[roadn].src].x, nodes[roads[roadn].src].y, 
+      nodes[roads[roadn].dest].x, nodes[roads[roadn].dest].y);
+    roadn++;
+}
+
+void edit_node(){
+  if (editnode == 0){
+    editnode = 1;
+    final String e1 = showInputDialog("Please enter the node to edit");
+    e = int(e1);
+    showMessageDialog(null, "Select the new location of the node");
+  }
+ 
+  if (editnode == 1){
+    addroad = 0;
+    addnode = 0;
+    editnode = 2;
+  }
+  if (editnode == 3){
+    nodes[e].x = mouseX;
+    nodes[e].y = mouseY;
+    editnode = 0;
+  }
+}
+
+void edit_road(){
+  if (editroad == 0){
+    showMessageDialog(null, "Select the node to edit");
+  }
+  if (editroad == 1){
+    addroad = 0;
+    addnode = 0;
+    editnode = 0;
+    editroad = 2;
+  }
+  if (editroad == 3){
+    final String time = showInputDialog("Please enter the new time value");
+    roads[croad].time = int(time);
+    final String pri = showInputDialog("Please enter the new priority value");
+    roads[croad].pri = int(pri);
+    editroad = 0;
+  }
+}
+
+void mouseClicked(){
+  print(roadd);
+  if (addnode == 1){
+    if (mouseY < 1.2*height/8){
+      
+    } else {
+      new_node();
+    }
+  }
+ 
+  if (editnode == 1){
+    if (mouseY < 1.2*height/8){
+      
+    } else {
+      edit_node();
+    }
+  }
+  if (editnode == 2){
+    editnode = 3;
+  }
+  if (editnode == 3){
+    edit_node();
+  }
+  if (editroad == 0){
+    for (int i = 0; i < roadn; i++){
+      int xm = nodes[roads[i].src].x + (nodes[roads[i].dest].x-nodes[roads[i].src].x)/2;
+      int ym = nodes[roads[i].src].y + (nodes[roads[i].dest].y-nodes[roads[i].src].y)/2;
+      if (sqrt(pow(mouseX-xm, 2)+pow(mouseY-ym,2)) < .01*(width/2+height/2)){
+        croad = i;
+        editroad = 1;
+        edit_road();
+      }
+    }
+  }
+  if (editroad == 2){
+    editroad = 3;
+  }
+  if (editroad == 3){
+    edit_road();
+  }
+  if (mouseX < 1.2*width/8 && mouseY < 1.2*height/8){
+    new_node();
+  }
+  if (mouseX > 1.2*width/8 && mouseX < 1.2*width/4 && mouseY < 1.2*height/8){
+    new_road();
+  }
+  if (mouseX > 2*1.2*width/8 && mouseX < 1.2*width*3/8 && mouseY < 1.2*height/8){
+    edit_node();
+  }
+  if (mouseX > 3*1.2*width/8 && mouseX < 1.2*width*4/8 && mouseY < 1.2*height/8){
+    edit_road();
+  }
+  if (mouseX > 1.2*width*1/2 && mouseY < 1.2*height/8){
+    addnode = 0;
+    addroad = 0;
+    editnode = 0;
+  }
+  
+}
+
+void keyPressed(){
+   if (roadd == -5) {
+    roadd = 1;
+    new_road();
+  }
+  if (roadd == -1){
+    for (int i = 0;i < numn; i++){
+      if (sqrt(pow(mouseX-nodes[i].x, 2)+pow(mouseY-nodes[i].y,2)) 
+                    < .01*(width/2+height/2)){
+        cnode = i;
+        roadd = 2;
+        new_road();
+      }
+    }
+  }
+  if (roadd == 3){
+    new_road();
+  }
+  if (roadd == -2){
+    for (int i = 0; i < numn; i++){
+      if (sqrt(pow(mouseX-nodes[i].x, 2)+pow(mouseY-nodes[i].y,2)) 
+                    < .01*(width/2+height/2)){
+        cnode2 = i;
+        roadd = 4;
+        new_road();
+      }
+    }
+  }
+  if (key == 'm'){
+    if (m == 0)
+      m = 1;
+    else
+      m = 0;
+  }
+  if (key == 'k')
+    get_input();
+  if (key == 'c'){
+    output.println(plow + "" + (numn+1) + " " + (roadn+1));
+    for (int i = 0; i < numn; i++)
+      output.println(i+ " " + nodes[i].x + " " + nodes[i].y);
+    for (int i = 0; i < roadn; i++)
+      output.println(i + " " + roads[i].src + " " + roads[i].dest + " " + roads[i].pri);
+    output.close();
+  }
+  if (key == 'n'){
+    output.println(plow + "" + (numn+1) + " " + (roadn+1));
+    for (int i = 0; i < numn; i++)
+      output.println(i+ " " + nodes[i].x + " " + nodes[i].y);
+    for (int i = 0; i < roadn; i++)
+      output.println(i + " " + roads[i].src + " " + roads[i].dest + " " + roads[i].pri);
+    output.close();
+    exit();
+  }
+}
+
+void get_input(){
+  int nnodes, nroads, cnode, croad;
+  try{
+  File file = new File("northwestcalg.txt");
+  Scanner scan = new Scanner(file);
+  plow = scan.nextInt();
+  nnodes = scan.nextInt();
+  nroads = scan.nextInt();
+  for (int i = 0; i < nnodes; i++){
+    cnode = scan.nextInt();
+    nodes[i] = new Node (i, int(scan.nextInt()/2.5), int(scan.nextInt()/2.5));
+  }
+  for (int i = 0; i < nroads-1; i++){
+    roads[i] = new Road(scan.nextInt(), scan.nextInt(), 
+                            scan.nextInt(), scan.nextInt());
+  }
+  numn = nnodes-1;
+  roadn = nroads-1;
+  scan.close();
+  }catch(Exception e){
+    println(e);
+  }
+}

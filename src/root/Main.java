@@ -27,8 +27,8 @@ public class Main {
 	private static final double change = 0.5;
 	private static Random r = new Random();
 	private static final int populationSize = 5000;
-	private static final int iterations = 300;
-	private static final double elite = 0.4;
+	private static final int iterations = 200;
+	private static final double elite = 0.2;
 
 	public static void main(String[] args) {
 		read();
@@ -80,6 +80,12 @@ public class Main {
 		roads = s.nextInt();
 		nodeData = new Node[nodes];
 		streetConnections = new Link[nodes][nodes];
+		for (int i = 0; i < nodes; i++) {
+			s.nextInt();
+			s.nextInt();
+			s.nextInt();
+		}
+		
 		for (int i = 0; i < roads; i++) {
 			int src = s.nextInt();
 			int dest = s.nextInt();
@@ -118,7 +124,7 @@ public class Main {
 		for (int i = 0; i < populationSize; i++) {
 			pop[i] = new Population(plows, nodes, roads, nodeData);
 		}
-//		Integer[] temp = { 1, 3, 0, 2, 0, 3, 1, 0, 4, 3, 2, 1, 2, 3, 4, 0, 1 };
+//		Integer[] temp= {0,1,2,5,2,1,0,3,6,7,8,7,6,3,4,5,4,1,4,3,0};
 //		pop[0].steps.get(0).clear();
 //		pop[0].steps.get(0).addAll(Arrays.asList(temp));
 		return pop;
@@ -143,7 +149,7 @@ public class Main {
 		});
 		System.out.println("Choosing elites");
 		Population[] newPop = new Population[populationSize];
-		for (int i = 0; i < (int) (1); i++) {
+		for (int i = 0; i < (int) (populationSize * elite/3); i++) {
 			newPop[i] = new Population(pop[i]);
 		}
 		Population[] baseMutations = new Population[(int) (populationSize*elite)];
@@ -173,8 +179,8 @@ public class Main {
 		
 
 			if (cutIndex == 0) {
-				ArrayList<Integer> connections = nodeData[pop.steps.get(i).get(0)].connections;
-				newPop.steps.get(i).add(0,connections.get(r.nextInt(connections.size())));
+//				ArrayList<Integer> connections = nodeData[pop.steps.get(i).get(0)].connections;
+//				newPop.steps.get(i).add(0,connections.get(r.nextInt(connections.size())));
 			} else {
 				for (int j = 0; j < size - cutIndex; j++) {
 					newPop.steps.get(i).remove(newPop.steps.get(i).size() - 1);
@@ -226,7 +232,7 @@ public class Main {
 			for (int i = 0; i < nodes; i++) {
 				for (int j = 0; j < nodes; j++) {
 					if (streetConnections[i][j] != null && visited[i][j] == -1) {
-						fit += streetConnections[i][j].priority * 24 * 60;
+						fit += streetConnections[i][j].priority * 24 * 6000;
 					}
 				}
 			}

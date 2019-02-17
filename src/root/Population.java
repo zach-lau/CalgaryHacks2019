@@ -13,11 +13,12 @@ import java.util.Random;
 public class Population {
 	ArrayList<ArrayList<Integer>> steps = new ArrayList<ArrayList<Integer>>();
 	private static Random r = new Random();
+	int init = 0;
 	public Population(int plows, int nodes, int roads, Node[] nodeData) {
 		int length = roads / plows;
 		for (int i = 0; i < plows; i++) {
 			steps.add(new ArrayList<Integer>());
-			steps.get(i).add(r.nextInt(nodes));
+			steps.get(i).add(init);
 			for (int j = 0; j < length - 1; j++) {
 				ArrayList<Integer> connections = nodeData[steps.get(i).get(j)].connections;
 				steps.get(i).add(connections.get(r.nextInt(connections.size())));

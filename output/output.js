@@ -112,15 +112,18 @@ function setup(){
         var file = this.files[0];
         
         var reader = new FileReader();
+
         reader.onload = function(progressEvent){
             var lines = this.result.split('\n');
             for(var line = 0; line < lines.length; line++){
                 plows.push(new Plow());
                 plows[line].nodes = lines[line].split(separator);
                 plows[line].numberNodes = plows[line].nodes.length;
+                //alert(plows[line].nodes);   
             }
             alert("File load successful");
         };
+
         reader.readAsText(file);
     };
 
@@ -284,7 +287,8 @@ function Plow(){
     this.initialize = function(){
         this.initialized = true;
         for(var i = 0;  i < this.numberNodes; i++){
-            this.nodes[i] = nodes[this.nodes[i]];
+            var k = parseInt(this.nodes[i]);
+            this.nodes[i] = nodes[k];
         }
         background.appendChild(this.img);  
         this.findEdge();

@@ -34,6 +34,7 @@ function setup(){
     //Reading in the files 
     document.getElementById('file').onchange = function(){
 
+        nodes = [];
         var file = this.files[0];
       
         var reader = new FileReader();
@@ -67,7 +68,9 @@ function setup(){
             if(y > maxy) maxy = y;
           }
 
+          //crate their images
           nodes.forEach(function(node){node.updateImg()});
+          
           //This creates all of the roads
 
           var offset = numNodes+1;
@@ -80,11 +83,12 @@ function setup(){
             var priority = parseInt(lines[road+offset][3]);
 
             roads.push(new Road(nodes[source], nodes[dest], time, priority));
+            roads[road].updateImg();
           }
 
 
 
-          alert(nodes[0].x);
+          alert("Loaded file successfully");
 
         };
         reader.readAsText(file);
@@ -132,12 +136,14 @@ function Node(id,x,y){
     this.img = document.createElement("IMG");
     this.img.style.position = "absolute";
     this.img.src = "node.png";
+    this.imgx = 0;
+    this.imgy = 0;
 
     this.updateImg = function(){
-        var imgx =  (x-minx)/(maxx-minx)*(width-2*margin)+margin;
-        var imgy = (y-miny)/(maxy-miny)*(height-2*margin)+margin;
-        this.img.style.top = imgy + 'px';
-        this.img.style.left = imgx + 'px';
+        this.imgx =  (x-minx)/(maxx-minx)*(width-2*margin)+margin;
+        this.imgy = (y-miny)/(maxy-miny)*(height-2*margin)+margin;
+        this.img.style.top = this.imgy + 'px';
+        this.img.style.left = this.imgx + 'px';
         this.img.style.width = nodeDiameter + 'px';
         this.img.style.height = nodeDiameter*width/length + 'px';
         //alert(imgx + ' ' + imgy);
@@ -150,5 +156,37 @@ function Road(source, dest, time, priority){
     this.dest = dest;
     this.time = time;
     this.priority = priority;
+    this.shovelled = false;
+    
+    this.img = document.createElement("IMG");
+    this.img.style.position = "absolute";
+    
+    this.updateImg = function(){
+        if(this.shovelled){
+             this.img.src = "goodroad.png";
+       }else{
+           this.img.src = "badroad.png";
+       }
+       var dx = this.dest.imgx - this.source.imgx;
+       var dy = this.dest.imgy - this.source.imgy;
+
+       //alert(dx + ' ' + dy);
+
+       var imgHeight =  nodeDiameter/5;
+       var distance = Math.sqrt(dx*dx+dy*dy);
+       var angle = Math.atan(dy/dx);
+
+       var offsetx = nodeDiameter/2 + Math.sin(angle)*imgHeight/2;
+       var offsety = nodeDiameter/2 - Math.cos(angle)*imgHeight/2; 
+       this.img.style.top = (this.dest.imgy + this.source.imgy)/2 + offsety + 'px';
+       this.img.style.left = (this.dest.imgx + this.source.imgx- distance)/2 + offsetx + 'px';
+       this.img.style.width = distance + 'px';
+       this.img.style.height = imgHeight + 'px';
+
+       this.img.style.transform = "rotate("+angle*57.2957795131+"deg)";
+    //alert("dab");
+
+       background.appendChild(this.img);
+    }
 }
 

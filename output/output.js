@@ -22,6 +22,7 @@ var files;
 var numNodes;
 var numRoads;
 var numPlows;
+var maxPriority;
 var separator = ' ';
 var offset;
 
@@ -81,6 +82,7 @@ function setup(){
           //This creates all of the roads
 
           var offset = numNodes+1;
+          maxPriority = 0;
 
           for(var road = 0; road < numRoads; road++){
 
@@ -88,6 +90,8 @@ function setup(){
             var dest = parseInt(lines[road+offset][1]);
             var time = parseInt(lines[road+offset][2]);
             var priority = parseInt(lines[road+offset][3]);
+
+            if(priority > maxPriority) maxPriority = priority;
 
             roads.push(new Road(nodes[source], nodes[dest], time, priority));
             roads[road].updateImg();
@@ -195,7 +199,7 @@ function Road(source, dest, time, priority){
     
     this.img = document.createElement("IMG");
     this.img.style.position = "absolute";
-    
+    var imgHeight =  this.priority/maxPriority*10;
     
     this.updateImg = function(){
         if(this.shovelled){
@@ -208,12 +212,12 @@ function Road(source, dest, time, priority){
 
        //alert(dx + ' ' + dy);
 
-       var imgHeight =  nodeDiameter/5;
+      
        var distance = Math.sqrt(dx*dx+dy*dy);
        var angle = Math.atan(dy/dx);
 
        var offsetx = nodeDiameter/2 + Math.sin(angle)*imgHeight/2;
-       var offsety = nodeDiameter/2 - Math.cos(angle)*imgHeight/2; 
+       var offsety = nodeDiameter/4 + Math.cos(angle)*imgHeight/2; 
        this.img.style.top = (this.dest.imgy + this.source.imgy)/2 + offsety + 'px';
        this.img.style.left = (this.dest.imgx + this.source.imgx- distance)/2 + offsetx + 'px';
        this.img.style.width = distance + 'px';

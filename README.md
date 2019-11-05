@@ -15,7 +15,7 @@ EdgeSrc	Dest Time Priority
 
 ...
 
-The neural net (src/root) takes this in and outputs another txt file with directions for plows in the forom shown below.
+The genetic algorithm (src/root) takes this in and outputs another txt file with directions for plows in the forom shown below.
 
 Node1 Node2 Node3 ...
 
